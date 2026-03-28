@@ -1,43 +1,602 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="utf-8" />
-    <link rel="icon" href="%PUBLIC_URL%/favicon.ico" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="theme-color" content="#000000" />
-    <meta
-      name="description"
-      content="Web site created using create-react-app"
-    />
-    <link rel="apple-touch-icon" href="%PUBLIC_URL%/logo192.png" />
-    <!--
-      manifest.json provides metadata used when your web app is installed on a
-      user's mobile device or desktop. See https://developers.google.com/web/fundamentals/web-app-manifest/
-    -->
-    <link rel="manifest" href="%PUBLIC_URL%/manifest.json" />
-    <!--
-      Notice the use of %PUBLIC_URL% in the tags above.
-      It will be replaced with the URL of the `public` folder during the build.
-      Only files inside the `public` folder can be referenced from the HTML.
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Projects</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;700;800&family=JetBrains+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0d0d0d;
+    --surface: #141414;
+    --border: #222;
+    --text: #e8e3d8;
+    --muted: #666;
+    --accent: #e8a234;
+    --accent-dim: rgba(232, 162, 52, 0.12);
+    --tag-bg: #1a1a1a;
+    --tag-active: var(--accent);
+    --tag-active-text: #0d0d0d;
+    --card-hover: #171717;
+    --radius: 3px;
+  }
 
-      Unlike "/favicon.ico" or "favicon.ico", "%PUBLIC_URL%/favicon.ico" will
-      work correctly both with client-side routing and a non-root public URL.
-      Learn how to configure a non-root public URL by running `npm run build`.
-    -->
-    <title>React App</title>
-  </head>
-  <body>
-    <noscript>You need to enable JavaScript to run this app.</noscript>
-    <div id="root"></div>
-    <!--
-      This HTML file is a template.
-      If you open it directly in the browser, you will see an empty page.
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-      You can add webfonts, meta tags, or analytics to this file.
-      The build step will place the bundled scripts into the <body> tag.
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Syne', sans-serif;
+    min-height: 100vh;
+    /* subtle noise */
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
+  }
 
-      To begin the development, run `npm start` or `yarn start`.
-      To create a production bundle, use `npm run build` or `yarn build`.
-    -->
-  </body>
+  /* ── LAYOUT ── */
+  .shell {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 0 32px;
+  }
+
+  /* ── HEADER ── */
+  header {
+    padding: 56px 0 40px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 40px;
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 24px;
+    flex-wrap: wrap;
+  }
+
+  .header-left {}
+
+  .site-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    font-weight: 400;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 10px;
+  }
+
+  h1 {
+    font-size: clamp(32px, 5vw, 52px);
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    line-height: 1;
+    color: var(--text);
+  }
+
+  .project-count {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    color: var(--muted);
+    margin-top: 10px;
+  }
+
+  .project-count span {
+    color: var(--text);
+    font-weight: 500;
+  }
+
+  /* ── SEARCH ── */
+  .search-wrap {
+    position: relative;
+    flex-shrink: 0;
+  }
+
+  .search-wrap svg {
+    position: absolute;
+    left: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    opacity: 0.35;
+    pointer-events: none;
+  }
+
+  input[type="search"] {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    color: var(--text);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    padding: 10px 16px 10px 40px;
+    width: 220px;
+    outline: none;
+    transition: border-color 0.2s;
+    -webkit-appearance: none;
+  }
+
+  input[type="search"]:focus {
+    border-color: var(--accent);
+  }
+
+  input[type="search"]::placeholder { color: var(--muted); }
+  input[type="search"]::-webkit-search-cancel-button { display: none; }
+
+  /* ── TAGS BAR ── */
+  .tags-bar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 36px;
+    align-items: center;
+  }
+
+  .tags-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-right: 4px;
+  }
+
+  .tag-btn {
+    background: var(--tag-bg);
+    border: 1px solid var(--border);
+    border-radius: 2px;
+    color: var(--muted);
+    cursor: pointer;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.05em;
+    padding: 5px 12px;
+    transition: all 0.15s;
+    user-select: none;
+    white-space: nowrap;
+  }
+
+  .tag-btn:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+
+  .tag-btn.active {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: var(--tag-active-text);
+    font-weight: 500;
+  }
+
+  .tag-btn.all-btn {
+    border-color: #333;
+    color: var(--text);
+    font-weight: 500;
+  }
+
+  .tag-btn.all-btn.active {
+    background: var(--text);
+    border-color: var(--text);
+    color: var(--bg);
+  }
+
+  /* ── GRID ── */
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 1px;
+    background: var(--border);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+    margin-bottom: 48px;
+  }
+
+  .card {
+    background: var(--surface);
+    padding: 28px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    transition: background 0.15s;
+    text-decoration: none;
+    color: inherit;
+    position: relative;
+    overflow: hidden;
+    animation: fadeIn 0.3s ease both;
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(6px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .card::before {
+    content: '';
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    width: 2px;
+    background: var(--accent);
+    transform: scaleY(0);
+    transform-origin: bottom;
+    transition: transform 0.2s ease;
+  }
+
+  .card:hover {
+    background: var(--card-hover);
+  }
+
+  .card:hover::before {
+    transform: scaleY(1);
+  }
+
+  .card-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 8px;
+  }
+
+  .card-name {
+    font-size: 16px;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    color: var(--text);
+    line-height: 1.2;
+  }
+
+  .card-arrow {
+    opacity: 0;
+    transition: opacity 0.15s, transform 0.15s;
+    flex-shrink: 0;
+    margin-top: 2px;
+    color: var(--accent);
+  }
+
+  .card:hover .card-arrow {
+    opacity: 1;
+    transform: translate(2px, -2px);
+  }
+
+  .card-path {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    color: var(--muted);
+    letter-spacing: 0.03em;
+  }
+
+  .card-path .path-accent {
+    color: var(--accent);
+    opacity: 0.7;
+  }
+
+  .card-desc {
+    font-size: 13.5px;
+    line-height: 1.6;
+    color: #999;
+    flex: 1;
+  }
+
+  .card-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 4px;
+  }
+
+  .card-tag {
+    background: var(--accent-dim);
+    border: 1px solid rgba(232, 162, 52, 0.2);
+    border-radius: 2px;
+    color: var(--accent);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.06em;
+    padding: 2px 8px;
+  }
+
+  /* ── PREVIEW IMAGE ── */
+  .card-preview {
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    border-radius: 2px;
+    overflow: hidden;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    position: relative;
+    margin-bottom: 4px;
+    flex-shrink: 0;
+  }
+
+  .card-preview img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    transition: transform 0.35s ease, opacity 0.2s;
+    opacity: 0;
+  }
+
+  .card-preview img.loaded {
+    opacity: 1;
+  }
+
+  .card:hover .card-preview img.loaded {
+    transform: scale(1.04);
+  }
+
+  /* placeholder shown while image loads or on error */
+  .card-preview-placeholder {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    color: #2a2a2a;
+    user-select: none;
+    pointer-events: none;
+  }
+
+  .card-preview-placeholder canvas {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+  }
+
+  .card-preview-placeholder span {
+    position: relative;
+    color: #333;
+    font-size: 10px;
+    letter-spacing: 0.12em;
+  }
+
+  /* ── EMPTY STATE ── */
+  .empty {
+    display: none;
+    grid-column: 1 / -1;
+    background: var(--surface);
+    padding: 72px 28px;
+    text-align: center;
+  }
+
+  .empty.visible { display: flex; flex-direction: column; align-items: center; gap: 12px; }
+
+  .empty-icon { font-size: 32px; opacity: 0.3; }
+
+  .empty-text {
+    font-size: 14px;
+    color: var(--muted);
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  /* ── HIDDEN ── */
+  .card.hidden { display: none; }
+
+  /* ── FOOTER ── */
+  footer {
+    border-top: 1px solid var(--border);
+    padding: 24px 0;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+</style>
+</head>
+<body>
+
+<div class="shell">
+  <header>
+    <div class="header-left">
+      <div class="site-label">~/projects</div>
+      <h1>Projects</h1>
+      <div class="project-count">
+        showing <span id="visible-count">0</span> of <span id="total-count">0</span>
+      </div>
+    </div>
+    <div class="search-wrap">
+      <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+        <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
+      </svg>
+      <input type="search" id="search" placeholder="search projects…" autocomplete="off">
+    </div>
+  </header>
+
+  <div class="tags-bar">
+    <span class="tags-label">Filter</span>
+    <button class="tag-btn all-btn active" data-tag="all">All</button>
+  </div>
+
+  <div class="grid" id="grid">
+    <div class="empty" id="empty">
+      <div class="empty-icon">◻</div>
+      <div class="empty-text">no matching projects</div>
+    </div>
+  </div>
+
+  <footer>
+    <span>/projects — project index</span>
+    <span id="footer-tags"></span>
+  </footer>
+</div>
+
+<script src="projects.js"></script>
+<script>
+const grid        = document.getElementById('grid');
+const emptyState  = document.getElementById('empty');
+const searchInput = document.getElementById('search');
+const tagsBar     = document.querySelector('.tags-bar');
+const visCount    = document.getElementById('visible-count');
+const totalCount  = document.getElementById('total-count');
+const footerTags  = document.getElementById('footer-tags');
+
+let activeTags    = new Set();
+let searchQuery   = '';
+
+// ── Collect all tags ──
+const allTags = [...new Set(PROJECTS.flatMap(p => p.tags))].sort();
+
+// ── Render tag buttons ──
+allTags.forEach(tag => {
+  const btn = document.createElement('button');
+  btn.className = 'tag-btn';
+  btn.dataset.tag = tag;
+  btn.textContent = tag;
+  btn.addEventListener('click', () => toggleTag(tag));
+  tagsBar.appendChild(btn);
+});
+
+footerTags.textContent = allTags.join(' · ');
+
+// ── Render project cards ──
+PROJECTS.forEach((p, i) => {
+  const card = document.createElement('a');
+  card.className = 'card';
+  card.href = `/projects/${p.name}/index.html`;
+  card.dataset.name = p.name.toLowerCase();
+  card.dataset.desc = p.desc.toLowerCase();
+  card.dataset.tags = p.tags.join(' ');
+  card.style.animationDelay = `${i * 40}ms`;
+
+  card.innerHTML = `
+    <div class="card-preview">
+      <div class="card-preview-placeholder">
+        <canvas data-seed="${p.name}"></canvas>
+        <span>${p.name.slice(0,2).toUpperCase()}</span>
+      </div>
+      <img
+        src="/projects/${p.name}/preview.png"
+        alt="${p.name} preview"
+        loading="lazy"
+        onerror="this.style.display='none'"
+        onload="this.classList.add('loaded')"
+      >
+    </div>
+    <div class="card-header">
+      <div class="card-name">${p.name}</div>
+      <svg class="card-arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+        <path d="M7 17 17 7M7 7h10v10"/>
+      </svg>
+    </div>
+    <div class="card-path"><span class="path-accent">~/projects/</span>${p.name}<span class="path-accent">/index.html</span></div>
+    <div class="card-desc">${p.desc}</div>
+    <div class="card-tags">${p.tags.map(t => `<span class="card-tag">${t}</span>`).join('')}</div>
+  `;
+
+  grid.insertBefore(card, emptyState);
+});
+
+totalCount.textContent = PROJECTS.length;
+
+// ── Filter logic ──
+function applyFilters() {
+  const q = searchQuery.trim();
+  let visible = 0;
+
+  document.querySelectorAll('.card:not(.empty)').forEach(card => {
+    const matchesSearch = !q ||
+      card.dataset.name.includes(q) ||
+      card.dataset.desc.includes(q) ||
+      card.dataset.tags.includes(q);
+
+    const cardTags = card.dataset.tags.split(' ');
+    const matchesTags = activeTags.size === 0 ||
+      [...activeTags].every(t => cardTags.includes(t));
+
+    const show = matchesSearch && matchesTags;
+    card.classList.toggle('hidden', !show);
+    if (show) visible++;
+  });
+
+  visCount.textContent = visible;
+  emptyState.classList.toggle('visible', visible === 0);
+}
+
+function toggleTag(tag) {
+  const allBtn = document.querySelector('.tag-btn.all-btn');
+
+  if (activeTags.has(tag)) {
+    activeTags.delete(tag);
+  } else {
+    activeTags.add(tag);
+  }
+
+  document.querySelectorAll('.tag-btn:not(.all-btn)').forEach(btn => {
+    btn.classList.toggle('active', activeTags.has(btn.dataset.tag));
+  });
+
+  allBtn.classList.toggle('active', activeTags.size === 0);
+  applyFilters();
+}
+
+// ── All button ──
+document.querySelector('.all-btn').addEventListener('click', () => {
+  activeTags.clear();
+  document.querySelectorAll('.tag-btn:not(.all-btn)').forEach(b => b.classList.remove('active'));
+  document.querySelector('.all-btn').classList.add('active');
+  applyFilters();
+});
+
+// ── Search ──
+searchInput.addEventListener('input', () => {
+  searchQuery = searchInput.value.toLowerCase();
+  applyFilters();
+});
+
+// ── Draw canvas placeholders ──
+function drawPlaceholder(canvas) {
+  const seed = canvas.dataset.seed || 'x';
+  const w = canvas.offsetWidth || 400;
+  const h = canvas.offsetHeight || 225;
+  canvas.width = w;
+  canvas.height = h;
+  const ctx = canvas.getContext('2d');
+
+  // seed-based pseudo-random
+  let s = [...seed].reduce((a, c) => (a * 31 + c.charCodeAt(0)) | 0, 0);
+  const rand = () => { s = (s * 1664525 + 1013904223) & 0xffffffff; return (s >>> 0) / 0xffffffff; };
+
+  // bg
+  ctx.fillStyle = '#111';
+  ctx.fillRect(0, 0, w, h);
+
+  // grid lines
+  ctx.strokeStyle = 'rgba(255,255,255,0.04)';
+  ctx.lineWidth = 1;
+  const gStep = 32;
+  for (let x = 0; x < w; x += gStep) { ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, h); ctx.stroke(); }
+  for (let y = 0; y < h; y += gStep) { ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(w, y); ctx.stroke(); }
+
+  // coloured blobs
+  const hue = Math.floor(rand() * 360);
+  for (let i = 0; i < 3; i++) {
+    const bx = rand() * w;
+    const by = rand() * h;
+    const br = 60 + rand() * 80;
+    const g = ctx.createRadialGradient(bx, by, 0, bx, by, br);
+    g.addColorStop(0, `hsla(${hue + i * 40}, 60%, 40%, 0.18)`);
+    g.addColorStop(1, 'transparent');
+    ctx.fillStyle = g;
+    ctx.fillRect(0, 0, w, h);
+  }
+
+  // scan-line overlay
+  for (let y = 0; y < h; y += 3) {
+    ctx.fillStyle = 'rgba(0,0,0,0.12)';
+    ctx.fillRect(0, y, w, 1);
+  }
+}
+
+// ── Init ──
+applyFilters();
+// Run after layout so canvas dimensions are known
+requestAnimationFrame(() => {
+  document.querySelectorAll('.card-preview-placeholder canvas').forEach(c => drawPlaceholder(c));
+});
+</script>
+</body>
 </html>
