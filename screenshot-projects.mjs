@@ -67,12 +67,16 @@ for (const project of projects) {
     continue;
   }
 
+  // Website projects use project.html as the live project; fall back to index.html
+  const projectHtmlPath = join(PROJECTS_DIR, project, 'project.html');
+  const screenshotTarget = existsSync(projectHtmlPath) ? 'project.html' : 'index.html';
+  const screenshotSourcePath = join(PROJECTS_DIR, project, screenshotTarget);
+
   if (ONLY_CHANGED && existsSync(previewPath)) {
-    const indexPath = join(PROJECTS_DIR, project, 'index.html');
-    if (existsSync(indexPath)) {
+    if (existsSync(screenshotSourcePath)) {
       const previewMtime = statSync(previewPath).mtimeMs;
-      const indexMtime   = statSync(indexPath).mtimeMs;
-      if (previewMtime > indexMtime) {
+      const sourceMtime  = statSync(screenshotSourcePath).mtimeMs;
+      if (previewMtime > sourceMtime) {
         console.log('  -  ' + project + ' (unchanged, skipping)');
         skipped++;
         continue;
@@ -80,7 +84,7 @@ for (const project of projects) {
     }
   }
 
-  const url = BASE_URL + '/projects/' + project + '/index.html';
+  const url = BASE_URL + '/projects/' + project + '/' + screenshotTarget;
 
   try {
     process.stdout.write('  screenshot  ' + project + ' ... ');

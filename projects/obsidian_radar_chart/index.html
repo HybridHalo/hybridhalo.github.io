@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Radar Chart — Obsidian Plugin</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;700;800&family=JetBrains+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0d0d0d;
+    --surface: #141414;
+    --border: #222;
+    --text: #e8e3d8;
+    --muted: #666;
+    --accent: #e8a234;
+    --accent-dim: rgba(232, 162, 52, 0.12);
+    --radius: 3px;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Syne', sans-serif;
+    min-height: 100vh;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
+  }
+
+  .shell { max-width: 900px; margin: 0 auto; padding: 0 32px 80px; }
+
+  nav { padding: 28px 0 0; margin-bottom: 48px; }
+
+  .back-link {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase;
+    color: var(--muted); text-decoration: none;
+    display: inline-flex; align-items: center; gap: 6px; transition: color 0.15s;
+  }
+  .back-link:hover { color: var(--accent); }
+
+  .hero { margin-bottom: 48px; }
+
+  .plugin-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px; letter-spacing: 0.18em; text-transform: uppercase;
+    color: var(--accent); margin-bottom: 12px;
+  }
+
+  h1 {
+    font-size: clamp(28px, 5vw, 48px); font-weight: 800;
+    letter-spacing: -0.03em; line-height: 1.1; margin-bottom: 16px;
+  }
+
+  .hero-desc {
+    font-size: 17px; line-height: 1.65; color: #999;
+    max-width: 620px; margin-bottom: 28px;
+  }
+
+  .hero-actions { display: flex; gap: 12px; flex-wrap: wrap; }
+
+  .btn {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 10px 20px; border-radius: var(--radius);
+    font-family: 'JetBrains Mono', monospace; font-size: 12px;
+    letter-spacing: 0.06em; text-decoration: none; transition: all 0.15s;
+    cursor: pointer; border: none;
+  }
+
+  .btn-primary { background: var(--accent); color: #0d0d0d; font-weight: 500; }
+  .btn-primary:hover { background: #d4922a; }
+  .btn-secondary { background: var(--surface); border: 1px solid var(--border); color: var(--text); }
+  .btn-secondary:hover { border-color: var(--accent); color: var(--accent); }
+
+  .preview-wrap {
+    width: 100%; aspect-ratio: 16 / 9;
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius); overflow: hidden; margin-bottom: 56px; position: relative;
+  }
+  .preview-wrap img { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+  .preview-placeholder {
+    position: absolute; inset: 0;
+    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px;
+  }
+  .preview-placeholder canvas { position: absolute; inset: 0; width: 100%; height: 100%; }
+  .preview-placeholder .ph-icon { position: relative; font-size: 40px; opacity: 0.2; }
+  .preview-placeholder .ph-label {
+    position: relative; font-family: 'JetBrains Mono', monospace;
+    font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase;
+    color: #444; border: 1px solid #2a2a2a; padding: 4px 12px; border-radius: 2px;
+  }
+
+  .section { margin-bottom: 48px; }
+
+  .section-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase;
+    color: var(--accent); margin-bottom: 16px;
+  }
+
+  .section h2 { font-size: 22px; font-weight: 700; letter-spacing: -0.02em; margin-bottom: 14px; }
+  .section p { font-size: 14.5px; line-height: 1.75; color: #999; margin-bottom: 12px; }
+  .section p:last-child { margin-bottom: 0; }
+
+  .features {
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 1px; background: var(--border); border: 1px solid var(--border); border-radius: var(--radius);
+  }
+  .feature { background: var(--surface); padding: 20px 22px; }
+  .feature-icon { font-size: 20px; margin-bottom: 8px; }
+  .feature-title { font-size: 13px; font-weight: 700; margin-bottom: 4px; color: var(--text); }
+  .feature-desc { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--muted); line-height: 1.6; }
+
+  /* Syntax example block */
+  .code-example {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 20px 24px;
+    margin-bottom: 24px;
+  }
+
+  .code-example pre {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12.5px;
+    line-height: 1.8;
+    color: #ccc;
+    white-space: pre;
+  }
+
+  .code-example .kw { color: var(--accent); }
+  .code-example .val { color: #7dd3fc; }
+  .code-example .cm { color: var(--muted); }
+
+  .install-steps {
+    display: flex; flex-direction: column;
+    gap: 1px; background: var(--border); border: 1px solid var(--border); border-radius: var(--radius);
+  }
+  .install-step { background: var(--surface); padding: 18px 22px; display: flex; gap: 16px; align-items: flex-start; }
+  .step-num {
+    font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--accent);
+    background: var(--accent-dim); border: 1px solid rgba(232,162,52,0.25); border-radius: 2px;
+    width: 24px; height: 24px; display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0; margin-top: 1px;
+  }
+  .step-text { font-size: 13.5px; line-height: 1.65; color: #999; }
+  .step-text code {
+    font-family: 'JetBrains Mono', monospace; font-size: 12px;
+    background: #1a1a1a; border: 1px solid var(--border); padding: 1px 6px;
+    border-radius: 2px; color: var(--accent);
+  }
+
+  footer {
+    border-top: 1px solid var(--border);
+    padding: 24px 0;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px; color: var(--muted);
+    display: flex; justify-content: space-between; flex-wrap: wrap; gap: 8px;
+  }
+</style>
+</head>
+<body>
+<div class="shell">
+
+  <nav>
+    <a href="/" class="back-link">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="m15 18-6-6 6-6"/></svg>
+      back to projects
+    </a>
+  </nav>
+
+  <div class="hero">
+    <div class="plugin-label">🔌 Obsidian Plugin</div>
+    <h1>Radar Chart</h1>
+    <p class="hero-desc">Create spider/radar charts directly inside your Obsidian notes using a simple code block syntax. Define your axes and values in plain text — the plugin renders a clean, angular chart that adapts to any number of data points and supports full colour customisation.</p>
+    <div class="hero-actions">
+      <a href="obsidian_radar_chart.zip" download class="btn btn-primary">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        Download .zip
+      </a>
+      <a href="https://github.com/hybridhalo/hybridhalo.github.io/tree/main/projects/obsidian_radar_chart" target="_blank" class="btn btn-secondary">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"/></svg>
+        View on GitHub
+      </a>
+    </div>
+  </div>
+
+  <div class="preview-wrap">
+    <div class="preview-placeholder">
+      <canvas id="ph-canvas"></canvas>
+      <div class="ph-icon">📊</div>
+      <div class="ph-label">obsidian plugin</div>
+    </div>
+    <img src="preview.png" alt="Radar Chart preview" style="position:relative;z-index:1;" onerror="this.style.display='none'">
+  </div>
+
+  <div class="section">
+    <div class="section-label">Overview</div>
+    <h2>What it does</h2>
+    <p>Radar Chart adds a <code style="font-family:'JetBrains Mono',monospace;font-size:13px;background:#1a1a1a;border:1px solid #222;padding:1px 6px;border-radius:2px;color:var(--accent)">```radar</code> code block to Obsidian. Write your axis labels and 0–100 values one per line, and the plugin renders a live spider chart inline in your note — no external tools, no exports, no fuss.</p>
+    <p>The chart geometry automatically adapts to however many data points you define: three axes produce a triangle, five produce a pentagon, eight an octagon, and so on. All three colour channels — the data polygon, the axis labels, and the background grid — are independently configurable via hex codes.</p>
+    <p>Because it renders directly inside reading and editing views, radar charts work naturally alongside your normal note content: useful for character sheets, skill assessments, product comparisons, personal reviews, or any situation where you want to visualise relative values at a glance.</p>
+  </div>
+
+  <div class="section">
+    <div class="section-label">Syntax</div>
+    <h2>How to use it</h2>
+    <div class="code-example">
+<pre><span class="cm">```radar</span>
+<span class="kw">Speed</span>: <span class="val">80</span>
+<span class="kw">Strength</span>: <span class="val">90</span>
+<span class="kw">Defense</span>: <span class="val">70</span>
+<span class="kw">Agility</span>: <span class="val">85</span>
+<span class="kw">Intelligence</span>: <span class="val">75</span>
+<span class="kw">color</span>: <span class="val">#00d4ff</span>
+<span class="kw">textColor</span>: <span class="val">#ffffff</span>
+<span class="kw">gridColor</span>: <span class="val">#333333</span>
+<span class="cm">```</span></pre>
+    </div>
+    <p>Each <code style="font-family:'JetBrains Mono',monospace;font-size:13px;background:#1a1a1a;border:1px solid #222;padding:1px 6px;border-radius:2px;color:var(--accent)">Label: Value</code> line defines one axis. Values should be between 0 and 100. The three colour options are all optional — omit any of them to use the defaults. Lines starting with <code style="font-family:'JetBrains Mono',monospace;font-size:13px;background:#1a1a1a;border:1px solid #222;padding:1px 6px;border-radius:2px;color:var(--accent)">#</code> are treated as comments and ignored.</p>
+  </div>
+
+  <div class="section">
+    <div class="section-label">Features</div>
+    <div class="features">
+      <div class="feature">
+        <div class="feature-icon">📐</div>
+        <div class="feature-title">Adaptive Geometry</div>
+        <div class="feature-desc">Automatically scales to any number of axes — triangle, pentagon, hexagon, or more</div>
+      </div>
+      <div class="feature">
+        <div class="feature-icon">🎨</div>
+        <div class="feature-title">Full Colour Control</div>
+        <div class="feature-desc">Independently set the data polygon, axis label, and grid line colours via hex codes</div>
+      </div>
+      <div class="feature">
+        <div class="feature-icon">⚡</div>
+        <div class="feature-title">No Build Required</div>
+        <div class="feature-desc">Ships with a pre-compiled main.js — just drop the files in and enable</div>
+      </div>
+      <div class="feature">
+        <div class="feature-icon">🌙</div>
+        <div class="feature-title">Theme Compatible</div>
+        <div class="feature-desc">Works with Obsidian's light and dark themes out of the box</div>
+      </div>
+      <div class="feature">
+        <div class="feature-icon">✍️</div>
+        <div class="feature-title">Plain Text Syntax</div>
+        <div class="feature-desc">Define charts with simple Label: Value lines — readable even in raw markdown</div>
+      </div>
+      <div class="feature">
+        <div class="feature-icon">📝</div>
+        <div class="feature-title">Inline Rendering</div>
+        <div class="feature-desc">Charts render live inside reading and editing views alongside your note content</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-label">Installation</div>
+    <div class="install-steps">
+      <div class="install-step">
+        <div class="step-num">1</div>
+        <div class="step-text">Download the <strong>.zip</strong> above and extract it. You need <code>main.js</code> and <code>manifest.json</code>.</div>
+      </div>
+      <div class="install-step">
+        <div class="step-num">2</div>
+        <div class="step-text">In your Obsidian vault, navigate to <code>.obsidian/plugins/</code> and create a new folder called <code>radar-chart</code>.</div>
+      </div>
+      <div class="install-step">
+        <div class="step-num">3</div>
+        <div class="step-text">Copy <code>main.js</code> and <code>manifest.json</code> into that folder.</div>
+      </div>
+      <div class="install-step">
+        <div class="step-num">4</div>
+        <div class="step-text">Restart Obsidian (or press <code>Ctrl/Cmd + R</code>), then go to <strong>Settings → Community Plugins</strong> and enable <em>Radar Chart</em>.</div>
+      </div>
+      <div class="install-step">
+        <div class="step-num">5</div>
+        <div class="step-text">Add a <code>```radar</code> code block to any note and start defining your axes.</div>
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    <span>obsidian_radar_chart</span>
+    <span>created 2025-06-11</span>
+  </footer>
+</div>
+
+<script>
+  const canvas = document.getElementById('ph-canvas');
+  const w = canvas.offsetWidth || 800, h = canvas.offsetHeight || 450;
+  canvas.width = w; canvas.height = h;
+  const ctx = canvas.getContext('2d');
+  const seed = 'obsidian_radar_chart';
+  let s = [...seed].reduce((a,c) => (a*31+c.charCodeAt(0))|0, 0);
+  const rand = () => { s=(s*1664525+1013904223)&0xffffffff; return (s>>>0)/0xffffffff; };
+  ctx.fillStyle='#111'; ctx.fillRect(0,0,w,h);
+  ctx.strokeStyle='rgba(255,255,255,0.04)'; ctx.lineWidth=1;
+  for(let x=0;x<w;x+=32){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,h);ctx.stroke();}
+  for(let y=0;y<h;y+=32){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(w,y);ctx.stroke();}
+  const hue=Math.floor(rand()*360);
+  for(let i=0;i<3;i++){
+    const bx=rand()*w,by=rand()*h,br=80+rand()*120;
+    const g=ctx.createRadialGradient(bx,by,0,bx,by,br);
+    g.addColorStop(0,`hsla(${hue+i*40},60%,40%,0.18)`);g.addColorStop(1,'transparent');
+    ctx.fillStyle=g;ctx.fillRect(0,0,w,h);
+  }
+</script>
+</body>
+</html>
