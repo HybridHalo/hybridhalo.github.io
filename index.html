@@ -310,15 +310,13 @@
     height: 100%;
     object-fit: cover;
     display: block;
-    transition: transform 0.35s ease, opacity 0.2s;
-    opacity: 0;
-  }
-
-  .card-preview img.loaded {
+    transition: transform 0.35s ease;
     opacity: 1;
+    position: relative;
+    z-index: 1;
   }
 
-  .card:hover .card-preview img.loaded {
+  .card:hover .card-preview img {
     transform: scale(1.04);
   }
 
@@ -327,12 +325,11 @@
     position: absolute;
     inset: 0;
     display: flex;
+    flex-direction: column;
     align-items: center;
     justify-content: center;
+    gap: 10px;
     font-family: 'JetBrains Mono', monospace;
-    font-size: 11px;
-    letter-spacing: 0.1em;
-    color: #2a2a2a;
     user-select: none;
     pointer-events: none;
   }
@@ -344,11 +341,22 @@
     height: 100%;
   }
 
-  .card-preview-placeholder span {
+  .card-preview-placeholder .ph-icon {
     position: relative;
-    color: #333;
+    font-size: 28px;
+    opacity: 0.25;
+    line-height: 1;
+  }
+
+  .card-preview-placeholder .ph-label {
+    position: relative;
+    color: #444;
     font-size: 10px;
-    letter-spacing: 0.12em;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    border: 1px solid #2a2a2a;
+    padding: 3px 10px;
+    border-radius: 2px;
   }
 
   /* ── EMPTY STATE ── */
@@ -462,18 +470,25 @@ PROJECTS.forEach((p, i) => {
   card.dataset.tags = p.tags.join(' ');
   card.style.animationDelay = `${i * 40}ms`;
 
+  const typeIcons = {
+    'obsidian plugin': '🔌',
+    'website': '🌐',
+  };
+  const phIcon  = typeIcons[p.type] || '📁';
+  const phLabel = p.type || 'project';
+
   card.innerHTML = `
     <div class="card-preview">
       <div class="card-preview-placeholder">
         <canvas data-seed="${p.name}"></canvas>
-        <span>${p.name.slice(0,2).toUpperCase()}</span>
+        <div class="ph-icon">${phIcon}</div>
+        <div class="ph-label">${phLabel}</div>
       </div>
       <img
         src="/projects/${p.name}/preview.png"
         alt="${p.name} preview"
         loading="lazy"
         onerror="this.style.display='none'"
-        onload="this.classList.add('loaded')"
       >
     </div>
     <div class="card-header">

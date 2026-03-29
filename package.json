@@ -1,0 +1,24 @@
+{
+  "name": "hybridhalo.github.io",
+  "version": "1.0.0",
+  "description": "",
+  "main": "projects.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/HybridHalo/hybriddhalo.github.io.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/HybridHalo/hybriddhalo.github.io/issues"
+  },
+  "homepage": "https://github.com/HybridHalo/hybriddhalo.github.io#readme",
+  "dependencies": {
+    "puppeteer": "^24.40.0"
+  }
+}
